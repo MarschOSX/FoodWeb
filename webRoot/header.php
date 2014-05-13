@@ -11,54 +11,7 @@
 	<title>FoodWeb</title>
 	<script src="/lib/js/jquery.1.11.0.min.js"></script>
 	<link href='http://fonts.googleapis.com/css?family=Bangers|Titan+One' rel='stylesheet' type='text/css'>
-	<style type="text/css">
-		body {
-			padding: 0;
-			margin: 0;
-		}
-		
-		div#headerBand {
-			background-color: #121212;
-			color: #FEFEFE;
-			padding: 3px 5px;
-			margin: 0;
-		}
-		
-		div#headerBand a#logo {
-			text-decoration: none;
-			font-family: Bangers;
-			letter-spacing: 2px;
-		}
-
-		span#logoSubtext {
-			font-family:'Titan One';
-			font-size: 13px;
-			margin-left: 5px;
-			margin-top: 16px;
-			float: left;
-		}
-		
-		div#headerBand a {
-			color: #FEFEFE;
-		}
-		
-		div#headerTitle {
-			float: left;
-		}
-		
-		div#headerControls {
-			float: right;
-		}
-		
-		h1, h2, h3 {
-			padding: 0;
-			margin: 0;
-		}
-		
-		.error {
-			color: red;
-		}
-	</style>
+	<link href='/lib/css/main.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
 	<div id="headerBand">
@@ -68,6 +21,7 @@
 		<span id="logoSubtext">Order Fast. Eat Well. FoodWeb.</span>
 		<div id="headerControls">
 			<a href="/site-settings.fw">Site Settings</a> |
+			<a href="/vendor-home.fw">Vendor Page</a> |
 			<?php
 				if( $LoginController->getLoginStatus() )
 					echo '<a href="/logout.fw">Logout</a>';
@@ -77,3 +31,4 @@
 		</div>
 		<div style="clear:both;"></div>
 	</div>
+	<div id="contentContainer">

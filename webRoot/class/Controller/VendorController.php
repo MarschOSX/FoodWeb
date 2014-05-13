@@ -7,7 +7,7 @@
 	
 	class VendorController extends Vendor {
 	
-		public function __construct() {
+		public function __construct($vendorId = null) {
 			$DB = Utility::getDB();
 			
 			if( !class_exists('LoginController') )
@@ -15,13 +15,31 @@
 			if( !isSet($LoginController) )
 				$LoginController = new LoginController;
 			
-			$user_id = $LoginController->getUserIndex();
-			if( $user_id !== false ) {
-				$result = $DB->checkIfUserIsVendor($user_id);
-				if( $result !== false ) {
-					$this->setVendorId($result);
+			if( $vendorId == null ) {
+				$user_id = $LoginController->getUserIndex();
+				if( $user_id !== false ) {
+					$result = $DB->checkIfUserIsVendor($user_id);
+					if( $result !== false ) {
+						$this->setVendorId($result);
+					}
 				}
+			} else {
+				$this->setVendorId($vendorId);
 			}
+			
+			$this->populateVendorName();
+		}
+		
+		private function getVendorInfo($vendorId) {
+			$DB = $this->getDB();
+			
+			return $DB->getVendorInfo($vendorId); 
+		}
+		
+		public function getLocationInfo($locationId) {
+			$DB = $this->getDB();
+			
+			return $DB->getVendorLocationInfo($this->getVendorId(), $locationId); 
 		}
 		
 		public function addMenu($menuName, $vendorId = null) {
@@ -141,7 +159,7 @@
 			
 			return true;
 		}
-		
+
 		public function get_hours($vendor_id = NULL){
 			$DB = Utility::getDB();
 			if($vendor_id == NULL){
@@ -159,7 +177,7 @@
 				
 			return $DB->getCurrentVendorStoreLocations($vendor_id);
 		}
-		
+
 		
 	}
 	

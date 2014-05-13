@@ -388,6 +388,26 @@
 			return $query->fetchAll();
 		}
 		
+		public function getMenuName($menuId) {
+			$PDODB = $this->getPDO();
+			
+			$query = $PDODB->prepare("SELECT name
+									  FROM menus 
+									  WHERE id = :menuId;");
+			$query->bindParam(':menuId', $menuId);
+			if(!$query->execute()) {
+				Utility::throwError($query->errorInfo());
+				return false;
+			}
+			
+			$q = $query->fetchAll();
+			
+			if( count($q) )
+				return $q[0]['name'];
+				
+			return '';
+		}
+		
 		public function getVendorName($vendor_id) {
 			$PDODB = $this->getPDO();
 			
@@ -407,6 +427,72 @@
 				return $qryResults[0]['name'];
 				
 			return false;
+		}
+		
+		public function getVendorInfo($vendorId) {
+			$PDODB = $this->getPDO();
+			
+			$q = $PDODB->prepare("SELECT V.name
+								  FROM vendors V
+								  WHERE V.id = :id;");
+			$q->bindParam(':id', $vendorId);
+			if(!$q->execute()) {
+				Utility::throwError($q->errorInfo());
+				return false;
+			}
+			
+			// If it exists, fail
+			$qryResults = $q->fetchAll();
+			if( count($qryResults) )
+				return $qryResults[0];
+				
+			return false;		
+		}
+		
+		public function getVendorLocationInfo($vendorId, $locationId) {
+			$PDODB = $this->getPDO();
+			
+			$q = $PDODB->prepare("SELECT V.name
+										 , VL.address
+										 , VL.zipcode
+								  FROM vendors V
+								  INNER JOIN vendor_locations VL
+									ON V.id = VL.vendor_id
+									AND VL.id = :locationId
+								  WHERE V.id = :id;");
+			$q->bindParam(':id', $vendorId);
+			$q->bindParam(':locationId', $locationId);
+			if(!$q->execute()) {
+				Utility::throwError($q->errorInfo());
+				return false;
+			}
+			
+			// If it exists, fail
+			$qryResults = $q->fetchAll();
+			if( count($qryResults) )
+				return $qryResults[0];
+				
+			return false;		
+		}
+		
+		public function updateProduct($item_id, $name, $price, $description) {
+			$PDODB = $this->getPDO();
+			
+			$q = $PDODB->prepare("UPDATE menu_items
+								  SET name = :name
+									  , price = :price
+									  , description = :description
+								  WHERE id = :item_id;");
+			$q->bindParam(':name', $name);
+			$q->bindParam(':price', $price);
+			$q->bindParam(':description', $description);
+			$q->bindParam(':item_id', $item_id);			
+			if( !$q->execute() ) {
+				Utility::throwError($q->errorInfo());
+				return false;
+			}
+			
+			return true;
 		}
 		
 		public function verifyLogin($password, $email) {
@@ -435,6 +521,33 @@
 			return false;
 		}
 		
+		public function addTrayItem($user_id,$item_id, $tray_id, $quantity){
+			$PDODB = $this->getPDO();
+			
+			$query = $PDODB->prepare("INSERT INTO tray_items
+									  (
+										id,
+										item_id,
+										tray_id,
+										quantity
+									  )
+									  VALUES
+									  (
+										:user_id
+										, :tray_id
+										, :tray_id
+										, :quantity
+									  )");
+			$query->bindParam(':user_id', $user_id);
+			$query->bindParam(':item_id', $item_id);
+			$query->bindParam(':tray_id', $tray_id);
+			$query->bindParam(':quantity', $quantity);
+			if(!$query->execute()) {
+				Utility::throwError($query->errorInfo());
+				return false;
+			}
+		}
+		
 		public function getTrayItem($tray_id){
 			$PDODB = $this->getPDO();
 			
@@ -444,7 +557,7 @@
 									  INNER JOIN trays TRA
 										ON TI.tray_id = TRA.id
 										AND TRA.user_id = :user_id;");
-			$query->bindParam(':user_', $vendor_id);
+			$query->bindParam(':user_id', $vendor_id);
 			if(!$query->execute()) {
 				Utility::throwError($query->errorInfo());
 				return false;
@@ -453,11 +566,29 @@
 			return $query->fetchAll();
 		}
 		public function removeTrayItem($tray_item_id){
+			$PDODB = $this->getPDO();
 		
+			$query = $PDODB->prepare("DELETE FROM tray_items
+										WHERE item_id  = :item;");
+			$query->bindParam(':item', $tray_item_id);
+			if(!$query->execute()) {
+				Utility::throwError($query->errorInfo());
+				return false;
+			}
 		}
-		public function emptyTrayItem($tray_id){
+
+		public function emptyTray($tray_id){
+			$PDODB = $this->getPDO();
+			
+			$query = $PDODB->prepare("DELETE FROM trays_items
+										WHERE tray_id = :tray_id;");
+			$query->bindParam(':tray_id', $tray_id);
+			if(!$query->execute()) {
+				Utility::throwError($query->errorInfo());
+				return false;
+			}
+		}
 		
-		}
 		public function updateTray($tray_id){
 		
 		}
@@ -498,6 +629,7 @@
 			$q = $PDODB->prepare("SELECT id
 										 , price
 										 , name
+										 , description
 								  FROM menu_items
 								  WHERE id = :id;");
 			$q->bindParam(':id', $productId);
